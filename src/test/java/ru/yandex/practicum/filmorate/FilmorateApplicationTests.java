@@ -52,7 +52,7 @@ class FilmorateApplicationTests {
 
 
     @Test
-    void USERControllerTest() {
+    void UserControllerTest() {
         //POST запросы
 
         // добавляем пользователя с пробелом в логине и смотрим результат
