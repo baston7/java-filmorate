@@ -28,13 +28,10 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public User createUser(@Valid @RequestBody User user) throws ValidationException {
+    public User createUser(@Valid @RequestBody User user) {
         log.info("Получен POST запрос от пользователя на создание пользователя");
         validatorUser(user);
-        if ((user.getName()==null||user.getName().isBlank())){
-            log.info("Пользователь не указал имя при регистрации");
-            user.setName(user.getLogin());
-        }
+        checkAndSetUserName(user);
         user.setId(idGenerator());
         users.put(user.getId(), user);
         log.info("POST запрос от пользователя успешно обработан");
@@ -42,44 +39,35 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public User updateUser(@Valid @RequestBody User user) throws ValidationException {
+    public User updateUser(@Valid @RequestBody User user) {
         log.info("Получен PUT запрос от пользователя на обновление пользователя");
         validatorUser(user);
         if (!users.containsKey(user.getId())) {
             log.info("Пользователь указал несуществующий id при обновлении");
             throw new ValidationException("несуществующий id при обновлении");
         }
-        if (user.getName()==null||user.getName().isBlank()) {
-            log.info("Пользователь не указал имя при обновлении");
-            user.setName(user.getLogin());
-        }
+        checkAndSetUserName(user);
         users.put(user.getId(), user);
         log.info("PUT запрос от пользователя успешно обработан");
         return user;
     }
 
-    private void validatorUser(User user) throws ValidationException {
-        if (containsWhiteSpace(user.getLogin())) {
+    private void checkAndSetUserName(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            log.info("Пользователь не указал имя пользователя в запросе");
+            user.setName(user.getLogin());
+        }
+    }
+
+    private void validatorUser(User user) {
+        if (user.getLogin().contains(" ")) {
             log.warn("Пользователь при создании логина использовал пробельные символы");
             throw new ValidationException("Логин содержит пробельные символы");
         }
     }
-    //метод для проверки наличия пробела в тексте
-    public static boolean containsWhiteSpace(final String string) {
-        if (string != null) {
-            for (int i = 0; i < string.length(); i++) {
-                if (Character.isWhitespace(string.charAt(i))) {
-                    return true;
-                }
-            }
-        }
-        return false;
+
+    private int idGenerator() {
+        return ++id;
     }
-
-
-
-        private int idGenerator() {
-            return ++id;
-        }
 
 }

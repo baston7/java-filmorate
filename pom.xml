@@ -12,7 +12,7 @@
 	<artifactId>filmorate</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>filmorate</name>
-	<description>Сервис для работты с фильмами и оценками пользователей</description>
+	<description>Сервис для работы с фильмами и оценками пользователей</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

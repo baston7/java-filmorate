@@ -15,6 +15,7 @@ import java.util.List;
 @Slf4j
 @RestController
 public class FilmController {
+    private static final LocalDate BOUNDARY_DATE = LocalDate.of(1895, 12, 25);
     private int id;
     private final HashMap<Integer, Film> films = new HashMap<>();
 
@@ -29,20 +30,20 @@ public class FilmController {
     }
 
     @PostMapping("/films")
-    public Film createFilm(@Valid @RequestBody Film film) throws ValidationException {
+    public Film createFilm(@Valid @RequestBody Film film) {
         log.info("Пользователь передал POST запрос на публикацию фильма");
         validatorFilm(film);
         film.setId(idGenerator());
         films.put(film.getId(), film);
-        log.info(" POST запрос от пользователя успешно обработан");
+        log.info("POST запрос от пользователя успешно обработан");
         return film;
     }
 
     @PutMapping("/films")
-    public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         log.info("Пользователь передал PUT запрос на обновление фильма");
         validatorFilm(film);
-        if(!films.containsKey(film.getId())){
+        if (!films.containsKey(film.getId())) {
             log.info("Нет фильма с таким id");
             throw new ValidationException("несуществующий id при обновлении");
         }
@@ -51,8 +52,8 @@ public class FilmController {
         return film;
     }
 
-    private void validatorFilm(Film film) throws ValidationException {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 25))) {
+    private void validatorFilm(Film film) {
+        if (film.getReleaseDate().isBefore(BOUNDARY_DATE)) {
             log.warn("Пользователь передал некорректную дату фильма");
             throw new ValidationException("Ошибка в дате релиза фильма");
         }
