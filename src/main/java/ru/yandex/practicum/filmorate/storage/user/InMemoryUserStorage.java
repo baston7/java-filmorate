@@ -2,20 +2,19 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
     private int id;
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Long, User> users = new HashMap<>();
 
     @Override
     public List<User> findAll() {
@@ -39,15 +38,36 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         validatorUser(user);
-        if (!users.containsKey(user.getId())) {
-            log.info("Пользователь указал несуществующий id при обновлении");
-            throw new ValidationException("несуществующий id при обновлении");
-        }
-        checkAndSetUserName(user);
+        checkUserId(user.getId());
+        User oldUser = users.get(user.getId());
+        Set<Long> oldUserFriendsId = oldUser.getFriendsId();
+        user.setFriendsId(oldUserFriendsId);
         users.put(user.getId(), user);
         log.info("PUT запрос от пользователя успешно обработан");
         return user;
     }
+
+    @Override
+    public User getUser(long id) {
+        checkUserId(id);
+        log.info("GET запрос на получение  пользователя успешно обработан");
+        return users.get(id);
+    }
+
+    @Override
+    public List<User> getFriends(long id) {
+        checkUserId(id);
+        if (!users.get(id).getFriendsId().isEmpty()) {
+            log.info("GET запрос на получение списка друзей пользователя успешно обработан.");
+            return users.get(id).getFriendsId().stream()
+                    .map(users::get)
+                    .collect(Collectors.toList());
+        } else {
+            log.info("GET запрос на получение списка друзей пользователя успешно обработан. Список пуст");
+            return Collections.emptyList();
+        }
+    }
+
     private void checkAndSetUserName(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             log.info("Пользователь не указал имя пользователя в запросе");
@@ -59,6 +79,13 @@ public class InMemoryUserStorage implements UserStorage {
         if (user.getLogin().contains(" ")) {
             log.warn("Пользователь при создании логина использовал пробельные символы");
             throw new ValidationException("Логин содержит пробельные символы");
+        }
+    }
+
+    private void checkUserId(long id) {
+        if (!users.containsKey(id)) {
+            log.info("Пользователь указал несуществующий id ");
+            throw new UserNotFoundException("Пользователь с таким id не найден");
         }
     }
 

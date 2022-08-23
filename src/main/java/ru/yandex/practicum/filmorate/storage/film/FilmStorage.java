@@ -10,4 +10,9 @@ public interface FilmStorage {
     Film createFilm(Film film);
 
     Film updateFilm(Film film);
+
+    Film getFilm(long id);
+
+    List<Film> getPopularFilms(int count);
+
 }
