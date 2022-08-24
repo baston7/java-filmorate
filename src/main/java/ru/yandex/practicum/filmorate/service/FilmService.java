@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.List;
+
 @Slf4j
 @Service
 public class FilmService {
@@ -34,7 +35,7 @@ public class FilmService {
         if (!film.getLikedUsersId().contains(userId)) {
             throw new UserNotFoundException("Пользователь не найден");
         } else {
-            film.setLikes(newLikes - 1);
+            film.setLikes(newLikes);
             film.getLikedUsersId().remove(userId);
             log.info("DELETE запрос успешно обработан.Лайк убран");
         }
@@ -60,6 +61,4 @@ public class FilmService {
     public Film getFilm(long id) {
         return filmStorage.getFilm(id);
     }
-
-
 }
