@@ -3,14 +3,14 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import org.springframework.lang.NonNull;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
-    private int id;
+    private long id;
     @NotBlank
     private final String name;
     @Size(max = 200)
@@ -19,5 +19,7 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive
     private final int duration;
+    private int likes;
+    private Set<Long> likedUsersId = new HashSet<>();
 
 }

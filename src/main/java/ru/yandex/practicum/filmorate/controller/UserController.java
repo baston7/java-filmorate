@@ -1,73 +1,70 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
 @RestController
 public class UserController {
-    private int id;
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final UserService userService;
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/users")
     public List<User> findAll() {
         log.info("Получен GET запрос от пользователя на получение списка всех пользователей");
-        if (!users.isEmpty()) {
-            return new ArrayList<>(users.values());
-        } else {
-            return Collections.emptyList();
-        }
+        return userService.findAll();
     }
 
     @PostMapping("/users")
     public User createUser(@Valid @RequestBody User user) {
         log.info("Получен POST запрос от пользователя на создание пользователя");
-        validatorUser(user);
-        checkAndSetUserName(user);
-        user.setId(idGenerator());
-        users.put(user.getId(), user);
-        log.info("POST запрос от пользователя успешно обработан");
-        return user;
+        return userService.createUser(user);
     }
 
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody User user) {
         log.info("Получен PUT запрос от пользователя на обновление пользователя");
-        validatorUser(user);
-        if (!users.containsKey(user.getId())) {
-            log.info("Пользователь указал несуществующий id при обновлении");
-            throw new ValidationException("несуществующий id при обновлении");
-        }
-        checkAndSetUserName(user);
-        users.put(user.getId(), user);
-        log.info("PUT запрос от пользователя успешно обработан");
-        return user;
+        return userService.updateUser(user);
     }
 
-    private void checkAndSetUserName(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            log.info("Пользователь не указал имя пользователя в запросе");
-            user.setName(user.getLogin());
-        }
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public List<Long> addFriend(@PathVariable long id, @PathVariable long friendId) {
+        log.info("Получен PUT запрос от пользователя на добавление в друзья");
+        return userService.addFriend(id, friendId);
     }
 
-    private void validatorUser(User user) {
-        if (user.getLogin().contains(" ")) {
-            log.warn("Пользователь при создании логина использовал пробельные символы");
-            throw new ValidationException("Логин содержит пробельные символы");
-        }
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public List<Long> deleteFriend(@PathVariable long id, @PathVariable long friendId) {
+        log.info("Получен DELETE запрос от пользователя на удаление из друзей");
+        return userService.deleteFriend(id, friendId);
     }
 
-    private int idGenerator() {
-        return ++id;
+    @GetMapping("/users/{id}/friends")
+    public List<User> getUserFriends(@PathVariable long id) {
+        log.info("Получен GET запрос от пользователя на получение списка друзей");
+        return userService.getUserFriends(id);
     }
 
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable long id) {
+        log.info("Получен GET запрос от пользователя на получение пользователя");
+        return userService.getUser(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> getGeneralUserFriends(@PathVariable long id, @PathVariable long otherId) {
+        log.info("Получен GET запрос от пользователя на получение списка общих друзей");
+        return userService.getGeneralFriends(id, otherId);
+    }
 }
+
+
