@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -12,9 +12,9 @@ import java.util.List;
 @Slf4j
 @RestController
 public class UserController {
-    private final UserService userService;
+    private final UserDao userService;
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserDao userService) {
         this.userService = userService;
     }
 
@@ -43,15 +43,15 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public List<Long> deleteFriend(@PathVariable long id, @PathVariable long friendId) {
+    public void deleteFriend(@PathVariable long id, @PathVariable long friendId) {
         log.info("Получен DELETE запрос от пользователя на удаление из друзей");
-        return userService.deleteFriend(id, friendId);
+        userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/users/{id}/friends")
     public List<User> getUserFriends(@PathVariable long id) {
         log.info("Получен GET запрос от пользователя на получение списка друзей");
-        return userService.getUserFriends(id);
+        return userService.getFriends(id);
     }
 
     @GetMapping("/users/{id}")
