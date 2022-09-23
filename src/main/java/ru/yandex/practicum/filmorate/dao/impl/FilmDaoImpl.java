@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.dao.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
 import ru.yandex.practicum.filmorate.dao.MpaDao;
 import ru.yandex.practicum.filmorate.dao.UserDao;
@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
-@Service
+@Component
 public class FilmDaoImpl implements FilmDao {
     private final JdbcTemplate jdbcTemplate;
     private final MpaDao mpaDao;

@@ -5,30 +5,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.dao.GenreDao;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.List;
 
 @Slf4j
 @RestController
 public class GenreController {
-    private final GenreDao genreDao;
+    private final GenreService genreService;
 
     @Autowired
-    public GenreController(GenreDao genreDao) {
-        this.genreDao = genreDao;
+    public GenreController(GenreService genreService) {
+        this.genreService = genreService;
     }
 
     @GetMapping("/genres")
     public List<Genre> findAll() {
         log.info("Получен GET запрос от пользователя на получение всех жанров");
-        return genreDao.getAllGenres();
+        return genreService.getAllGenres();
     }
 
     @GetMapping("/genres/{id}")
     public Genre getGenre(@PathVariable int id) {
         log.info("Получен GET запрос от пользователя на получение жанра");
-        return genreDao.getGenreByID(id);
+        return genreService.getGenreByID(id);
     }
 }

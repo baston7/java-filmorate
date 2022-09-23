@@ -5,30 +5,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.dao.MpaDao;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
 
 @Slf4j
 @RestController
 public class MpaController {
-    private final MpaDao mpaDao;
+    private final MpaService mpaService;
 
     @Autowired
-    public MpaController(MpaDao mpaDao) {
-        this.mpaDao = mpaDao;
+    public MpaController(MpaService mpaService) {
+        this.mpaService = mpaService;
     }
 
     @GetMapping("/mpa")
     public List<Mpa> findAll() {
         log.info("Получен GET запрос от пользователя на получение всех рейтингов");
-        return mpaDao.getAllMpa();
+        return mpaService.getAllMpa();
     }
 
     @GetMapping("/mpa/{id}")
     public Mpa getMpa(@PathVariable int id) {
         log.info("Получен GET запрос от пользователя на получение рейтинга");
-        return mpaDao.getMpaByID(id);
+        return mpaService.getMpaByID(id);
     }
 }

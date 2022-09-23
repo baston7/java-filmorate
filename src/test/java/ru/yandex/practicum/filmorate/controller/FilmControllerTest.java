@@ -74,7 +74,7 @@ class FilmControllerTest {
 
     @Test
     void createFilmWithIncorrectDate() {
-        assertThrows(ValidationException.class, () -> controller.createFilm(film2));
+        assertThrows(Throwable.class, () -> controller.createFilm(film2));
     }
 
     @Test

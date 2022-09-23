@@ -3,7 +3,8 @@ package ru.yandex.practicum.filmorate.dao.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.GenreDao;
 import ru.yandex.practicum.filmorate.exeption.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -11,7 +12,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 public class GenreDaoImpl implements GenreDao {
 
     private final JdbcTemplate jdbcTemplate;
