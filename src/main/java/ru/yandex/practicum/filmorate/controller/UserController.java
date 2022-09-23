@@ -43,15 +43,15 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public List<Long> deleteFriend(@PathVariable long id, @PathVariable long friendId) {
+    public void deleteFriend(@PathVariable long id, @PathVariable long friendId) {
         log.info("Получен DELETE запрос от пользователя на удаление из друзей");
-        return userService.deleteFriend(id, friendId);
+        userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/users/{id}/friends")
     public List<User> getUserFriends(@PathVariable long id) {
         log.info("Получен GET запрос от пользователя на получение списка друзей");
-        return userService.getUserFriends(id);
+        return userService.getFriends(id);
     }
 
     @GetMapping("/users/{id}")

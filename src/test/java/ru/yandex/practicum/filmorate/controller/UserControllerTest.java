@@ -1,32 +1,33 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exeption.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserControllerTest {
-    UserController controller;
-    User user = new User("s@mail.ru", "p apa", LocalDate.of(1895, 12, 28));
-    User user2 = new User("s@mail.ru", "papa", LocalDate.of(1895, 12, 28));
-    User user3 = new User("s@mail.ru", "lapa", LocalDate.of(1895, 12, 28));
-    User user4 = new User("b@mail.ru", "mama", LocalDate.of(1895, 12, 28));
-    User user5 = new User("a@mail.ru", "papa", LocalDate.of(1897, 12, 28));
-    User user6 = new User("t@mail.ru", "tetya", LocalDate.of(1997, 12, 28));
 
-    @BeforeEach
-    void createController() {
-        controller = new UserController(new UserService(new InMemoryUserStorage()));
-        ;
-    }
+    private final UserController controller;
+    User user = new User("s@mail.ru", "p apa", "daddy", LocalDate.of(1895, 12, 28));
+    User user2 = new User("s@mail.ru", "papa", "daddy", LocalDate.of(1895, 12, 28));
+    User user3 = new User("s@mail.ru", "lapa", "lapka", LocalDate.of(1895, 12, 28));
+    User user4 = new User("b@mail.ru", "mama", "mama", LocalDate.of(1895, 12, 28));
+    User user5 = new User("a@mail.ru", "papa", "daddy", LocalDate.of(1897, 12, 28));
+    User user6 = new User("t@mail.ru", "tetya", "tetka", LocalDate.of(1997, 12, 28));
 
     @Test
     void findAllWithNoUsers() {
@@ -56,9 +57,9 @@ class UserControllerTest {
 
     @Test
     void createUserWithCorrectLoginAndName() {
-        user2.setName("daddy");
+        user2.setName("lol");
         controller.createUser(user2);
-        assertEquals("daddy", controller.findAll().get(0).getName(), "Имя не совпадает с назначенным");
+        assertEquals("lol", controller.findAll().get(0).getName(), "Имя не совпадает с назначенным");
     }
 
 
@@ -78,18 +79,18 @@ class UserControllerTest {
 
     @Test
     void updateUserWithIncorrectId() {
-        controller.createUser(user2);
-        user3.setId(88);
-        assertThrows(UserNotFoundException.class, () -> controller.updateUser(user3));
+        User user = controller.createUser(user2);
+        user.setId(88);
+        assertThrows(UserNotFoundException.class, () -> controller.updateUser(user));
     }
 
     @Test
     void createUsersAndCheckFriends() {
-        controller.createUser(user5);
-        controller.createUser(user4);
+        User user1 = controller.createUser(user5);
+        User user2 = controller.createUser(user4);
 
-        assertEquals(0, controller.getUserFriends(user5.getId()).size(), "Список друзей не пуст");
-        assertEquals(0, controller.getUserFriends(user4.getId()).size(), "Список друзей не пуст");
+        assertEquals(0, controller.getUserFriends(user1.getId()).size(), "Список друзей не пуст");
+        assertEquals(0, controller.getUserFriends(user2.getId()).size(), "Список друзей не пуст");
     }
 
     @Test
@@ -101,31 +102,34 @@ class UserControllerTest {
 
     @Test
     void addCorrectFriend() {
-        controller.createUser(user5);
-        controller.createUser(user4);
-        controller.addFriend(user5.getId(), user4.getId());
+        User user1 = controller.createUser(user5);
+        User user2 = controller.createUser(user4);
+        controller.addFriend(user1.getId(), user2.getId());
 
-        assertEquals(1, controller.getUserFriends(user5.getId()).size(), "Список друзей пуст");
-        assertEquals(1, controller.getUserFriends(user4.getId()).size(), "Список друзей пуст");
+        assertEquals(1, controller.getUserFriends(user1.getId()).size(), "Список друзей пуст");
+        assertEquals(0, controller.getUserFriends(user2.getId()).size(), "Список друзей не пуст");
     }
 
     @Test
     void deleteFriendWithIncorrectId() {
-        controller.createUser(user5);
-        controller.createUser(user4);
-        controller.addFriend(user5.getId(), user4.getId());
+        User user1 = controller.createUser(user5);
+        User user2 = controller.createUser(user4);
+        controller.addFriend(user1.getId(), user2.getId());
         assertThrows(UserNotFoundException.class, () -> controller.deleteFriend(-2, 88));
     }
 
     @Test
     void deleteFriendWithCorrectId() {
-        controller.createUser(user5);
-        controller.createUser(user4);
-        controller.addFriend(user5.getId(), user4.getId());
-        controller.deleteFriend(user5.getId(), user4.getId());
+        User user1 = controller.createUser(user5);
+        User user2 = controller.createUser(user4);
 
-        assertEquals(0, controller.getUserFriends(user5.getId()).size(), "Список друзей не пуст");
-        assertEquals(0, controller.getUserFriends(user4.getId()).size(), "Список друзей не пуст");
+        controller.addFriend(user1.getId(), user2.getId());
+        controller.addFriend(user2.getId(), user1.getId());
+
+        controller.deleteFriend(user1.getId(), user2.getId());
+
+        assertEquals(0, controller.getUserFriends(user1.getId()).size(), "Список друзей не пуст");
+        assertEquals(1, controller.getUserFriends(user2.getId()).size(), "Список друзей пуст");
     }
 
     @Test
@@ -135,37 +139,28 @@ class UserControllerTest {
 
     @Test
     void getUserFriendsWithUserWithoutFriends() {
-        controller.createUser(user4);
-        assertEquals(0, controller.getUserFriends(user4.getId()).size(), "Список друзей не пуст");
+        User user = controller.createUser(user4);
+        assertEquals(0, controller.getUserFriends(user.getId()).size(), "Список друзей не пуст");
     }
-
-    @Test
-    void getUserFriendsWithUserAndFriend() {
-        controller.createUser(user5);
-        controller.createUser(user4);
-        controller.addFriend(user5.getId(), user4.getId());
-        assertEquals(1, controller.getUserFriends(user4.getId()).size(), "Список друзей пуст");
-    }
-
 
     @Test
     void getGeneralUserFriendsWithoutGeneral() {
-        controller.createUser(user5);
-        controller.createUser(user4);
-        controller.addFriend(user5.getId(), user4.getId());
-        assertEquals(0, controller.getGeneralUserFriends(user4.getId(), user5.getId()).size(),
+        User user1 = controller.createUser(user5);
+        User user2 = controller.createUser(user4);
+        controller.addFriend(user1.getId(), user2.getId());
+        assertEquals(0, controller.getGeneralUserFriends(user1.getId(), user2.getId()).size(),
                 "Список общих друзей не пуст");
     }
 
     @Test
     void getGeneralUserFriendsWithGeneralFriends() {
-        controller.createUser(user5);
-        controller.createUser(user4);
-        controller.createUser(user6);
+        User user1 = controller.createUser(user5);
+        User user2 = controller.createUser(user4);
+        User user3 = controller.createUser(user6);
 
-        controller.addFriend(user6.getId(), user5.getId());
-        controller.addFriend(user6.getId(), user4.getId());
-        assertEquals(1, controller.getGeneralUserFriends(user4.getId(), user5.getId()).size(),
+        controller.addFriend(user1.getId(), user3.getId());
+        controller.addFriend(user2.getId(), user3.getId());
+        assertEquals(1, controller.getGeneralUserFriends(user2.getId(), user1.getId()).size(),
                 "Список общих друзей  пуст");
     }
 }
